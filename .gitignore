@@ -1,0 +1,27 @@
+## .NET Core
+bin/
+obj/
+*.user
+*.suo
+*.cache
+
+## Visual Studio Code
+.vscode/
+!.vscode/tasks.json
+!.vscode/launch.json
+
+## SQLite Database (keep the Data folder but ignore db files during development)
+# Data/*.db
+# Data/*.db-journal
+# Data/*.db-shm
+# Data/*.db-wal
+
+## Windows
+Thumbs.db
+Desktop.ini
+
+## Installation scripts
+dotnet-install.ps1
+
+## Logs
+*.log
