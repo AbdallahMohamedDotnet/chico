@@ -13,6 +13,7 @@ namespace ChicoDesktopApp.Forms
         private readonly DatabaseHelper _dbHelper;
         private readonly ProductRepository _productRepository;
         private readonly CategoryRepository _categoryRepository;
+        private readonly ReportRepository _reportRepository;
         
         // Product management controls
         private Panel pnlProductManagement;
@@ -29,6 +30,7 @@ namespace ChicoDesktopApp.Forms
             _dbHelper = new DatabaseHelper();
             _productRepository = new ProductRepository(_dbHelper);
             _categoryRepository = new CategoryRepository(_dbHelper);
+            _reportRepository = new ReportRepository(_dbHelper);
             
             // Initialize product management section
             InitializeProductManagementSection();
@@ -272,7 +274,7 @@ namespace ChicoDesktopApp.Forms
 
         private void BtnAddProduct_Click(object sender, EventArgs e)
         {
-            var editForm = new ProductEditForm(_dbHelper);
+            var editForm = new ProductEditForm(_productRepository, _categoryRepository);
             if (editForm.ShowDialog() == DialogResult.OK)
             {
                 LoadProducts();
@@ -296,7 +298,7 @@ namespace ChicoDesktopApp.Forms
 
             if (product != null)
             {
-                var editForm = new ProductEditForm(_dbHelper, product);
+                var editForm = new ProductEditForm(_productRepository, _categoryRepository, product);
                 if (editForm.ShowDialog() == DialogResult.OK)
                 {
                     LoadProducts();
@@ -347,16 +349,18 @@ namespace ChicoDesktopApp.Forms
         {
             try
             {
-                // Get total products
-                var totalProducts = _productRepository.GetAllProducts().Count;
-                lblTotalProducts.Text = $"📦 إجمالي المنتجات\n{totalProducts}";
+                var stats = _reportRepository.GetDashboardStatistics();
 
-                // Get low stock products
-                var lowStockProducts = _productRepository.GetLowStockProducts().Count;
-                lblLowStock.Text = $"⚠️ تنبيه مخزون منخفض\n{lowStockProducts}";
+                // Update product stats
+                lblTotalProducts.Text = $"📦 إجمالي المنتجات\n{stats.TotalProducts}";
+                lblLowStock.Text = $"⚠️ تنبيه مخزون منخفض\n{stats.LowStockProducts}";
 
-                // Get today's sales (placeholder - will implement later)
-                lblTodaySales.Text = "💰 مبيعات اليوم\n0.00";
+                // Update sales stats
+                lblTodaySales.Text = $"💰 مبيعات اليوم\n{stats.TodaysSales:N2} جنيه";
+                
+                // You can add more stat labels if needed
+                // lblTodaysProfit.Text = $"ربح اليوم: {stats.TodaysProfit:N2}";
+                // lblInventoryValue.Text = $"قيمة المخزون: {stats.InventoryValue:N2}";
             }
             catch (Exception ex)
             {
@@ -405,9 +409,8 @@ namespace ChicoDesktopApp.Forms
 
         private void btnReports_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("قريباً: التقارير", "قيد التطوير",
-                MessageBoxButtons.OK, MessageBoxIcon.Information);
-            // TODO: Open Reports Form
+            var reportsForm = new ReportsForm(_dbHelper);
+            reportsForm.ShowDialog();
         }
 
         private void btnUsers_Click(object sender, EventArgs e)
@@ -424,6 +427,19 @@ namespace ChicoDesktopApp.Forms
             
             // Refresh stats in case users were added/modified
             LoadDashboardStats();
+        }
+
+        private void btnBackup_Click(object sender, EventArgs e)
+        {
+            if (!SessionManager.IsAdmin)
+            {
+                MessageBox.Show("عذراً، هذه الميزة متاحة للمديرين فقط", "غير مصرح",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            using var form = new BackupRestoreForm(_dbHelper);
+            form.ShowDialog();
         }
 
         private void btnLogout_Click(object sender, EventArgs e)

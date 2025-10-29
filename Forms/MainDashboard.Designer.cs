@@ -14,6 +14,7 @@ namespace ChicoDesktopApp.Forms
         private System.Windows.Forms.Button btnPurchaseInvoice;
         private System.Windows.Forms.Button btnReports;
         private System.Windows.Forms.Button btnUsers;
+        private System.Windows.Forms.Button btnBackup;
         private System.Windows.Forms.Button btnLogout;
         private System.Windows.Forms.Panel panelStats;
         private System.Windows.Forms.Label lblTotalProducts;
@@ -43,6 +44,7 @@ namespace ChicoDesktopApp.Forms
             this.btnPurchaseInvoice = new System.Windows.Forms.Button();
             this.btnReports = new System.Windows.Forms.Button();
             this.btnUsers = new System.Windows.Forms.Button();
+            this.btnBackup = new System.Windows.Forms.Button();
             this.btnLogout = new System.Windows.Forms.Button();
             this.panelContent = new System.Windows.Forms.Panel();
             this.panelStats = new System.Windows.Forms.Panel();
@@ -105,6 +107,7 @@ namespace ChicoDesktopApp.Forms
             // 
             this.panelSidebar.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(38)))), ((int)(((byte)(50)))), ((int)(((byte)(56)))));
             this.panelSidebar.Controls.Add(this.btnLogout);
+            this.panelSidebar.Controls.Add(this.btnBackup);
             this.panelSidebar.Controls.Add(this.btnUsers);
             this.panelSidebar.Controls.Add(this.btnReports);
             this.panelSidebar.Controls.Add(this.btnPurchaseInvoice);
@@ -190,6 +193,21 @@ namespace ChicoDesktopApp.Forms
             this.btnUsers.Text = "👥 المستخدمين";
             this.btnUsers.UseVisualStyleBackColor = false;
             this.btnUsers.Click += new System.EventHandler(this.btnUsers_Click);
+            // 
+            // btnBackup
+            // 
+            this.btnBackup.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(38)))), ((int)(((byte)(50)))), ((int)(((byte)(56)))));
+            this.btnBackup.FlatAppearance.BorderSize = 0;
+            this.btnBackup.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnBackup.Font = new System.Drawing.Font("Segoe UI", 11F, System.Drawing.FontStyle.Bold);
+            this.btnBackup.ForeColor = System.Drawing.Color.White;
+            this.btnBackup.Location = new System.Drawing.Point(0, 370);
+            this.btnBackup.Name = "btnBackup";
+            this.btnBackup.Size = new System.Drawing.Size(200, 60);
+            this.btnBackup.TabIndex = 5;
+            this.btnBackup.Text = "🗄️ نسخ احتياطي";
+            this.btnBackup.UseVisualStyleBackColor = false;
+            this.btnBackup.Click += new System.EventHandler(this.btnBackup_Click);
             // 
             // btnLogout
             // 
