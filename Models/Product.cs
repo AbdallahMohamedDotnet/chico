@@ -19,6 +19,7 @@ namespace ChicoDesktopApp.Models
 
         // Navigation property
         public string CategoryName { get; set; } = string.Empty;
+        public string? CategoryNameArabic { get; set; }
 
         // Computed properties
         public decimal ProfitMargin => SalePrice - PurchasePrice;
