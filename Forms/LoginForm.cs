@@ -15,6 +15,10 @@ namespace ChicoDesktopApp.Forms
             _dbHelper = new DatabaseHelper();
             _authRepository = new AuthRepository(_dbHelper);
             
+            // Load and apply theme
+            ThemeManager.LoadThemePreference();
+            ThemeManager.ApplyTheme(this);
+            
             // Set focus to username field
             this.Load += (s, e) => txtUsername.Focus();
             

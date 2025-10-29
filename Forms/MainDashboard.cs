@@ -24,6 +24,9 @@ namespace ChicoDesktopApp.Forms
         private Button btnDeleteProduct;
         private Button btnRefresh;
 
+        // Theme toggle button
+        private Button btnThemeToggle;
+
         public MainDashboard()
         {
             InitializeComponent();
@@ -32,12 +35,24 @@ namespace ChicoDesktopApp.Forms
             _categoryRepository = new CategoryRepository(_dbHelper);
             _reportRepository = new ReportRepository(_dbHelper);
             
+            // Load theme preference
+            ThemeManager.LoadThemePreference();
+            
+            // Subscribe to theme change events
+            ThemeManager.ThemeChanged += OnThemeChanged;
+            
             // Initialize product management section
             InitializeProductManagementSection();
+            
+            // Initialize theme toggle button
+            InitializeThemeToggleButton();
         }
 
         private void MainDashboard_Load(object sender, EventArgs e)
         {
+            // Apply theme on load
+            ApplyTheme();
+            
             // Update welcome message with current user
             lblCurrentUser.Text = $"المستخدم: {SessionManager.GetCurrentUserDisplay()} ({SessionManager.CurrentUser?.RoleDisplay})";
             
@@ -49,6 +64,7 @@ namespace ChicoDesktopApp.Forms
             changePasswordItem.Click += (s, ev) =>
             {
                 using var form = new ChangePasswordForm(_dbHelper);
+                ThemeManager.ApplyTheme(form);
                 form.ShowDialog();
             };
             userMenu.Items.Add(changePasswordItem);
@@ -275,6 +291,7 @@ namespace ChicoDesktopApp.Forms
         private void BtnAddProduct_Click(object sender, EventArgs e)
         {
             var editForm = new ProductEditForm(_productRepository, _categoryRepository);
+            ThemeManager.ApplyTheme(editForm);
             if (editForm.ShowDialog() == DialogResult.OK)
             {
                 LoadProducts();
@@ -299,6 +316,7 @@ namespace ChicoDesktopApp.Forms
             if (product != null)
             {
                 var editForm = new ProductEditForm(_productRepository, _categoryRepository, product);
+                ThemeManager.ApplyTheme(editForm);
                 if (editForm.ShowDialog() == DialogResult.OK)
                 {
                     LoadProducts();
@@ -394,6 +412,7 @@ namespace ChicoDesktopApp.Forms
         private void btnSalesInvoice_Click(object sender, EventArgs e)
         {
             var salesInvoiceForm = new SalesInvoiceForm(_dbHelper);
+            ThemeManager.ApplyTheme(salesInvoiceForm);
             salesInvoiceForm.ShowDialog();
             // Refresh dashboard stats after closing sales invoice
             LoadDashboardStats();
@@ -402,6 +421,7 @@ namespace ChicoDesktopApp.Forms
         private void btnPurchaseInvoice_Click(object sender, EventArgs e)
         {
             var purchaseInvoiceForm = new PurchaseInvoiceForm(_dbHelper);
+            ThemeManager.ApplyTheme(purchaseInvoiceForm);
             purchaseInvoiceForm.ShowDialog();
             // Refresh dashboard stats after closing purchase invoice
             LoadDashboardStats();
@@ -410,6 +430,7 @@ namespace ChicoDesktopApp.Forms
         private void btnReports_Click(object sender, EventArgs e)
         {
             var reportsForm = new ReportsForm(_dbHelper);
+            ThemeManager.ApplyTheme(reportsForm);
             reportsForm.ShowDialog();
         }
 
@@ -423,6 +444,7 @@ namespace ChicoDesktopApp.Forms
             }
 
             using var form = new UserManagementForm(_dbHelper);
+            ThemeManager.ApplyTheme(form);
             form.ShowDialog();
             
             // Refresh stats in case users were added/modified
@@ -439,6 +461,7 @@ namespace ChicoDesktopApp.Forms
             }
 
             using var form = new BackupRestoreForm(_dbHelper);
+            ThemeManager.ApplyTheme(form);
             form.ShowDialog();
         }
 
@@ -467,8 +490,111 @@ namespace ChicoDesktopApp.Forms
             }
         }
 
+        private void InitializeThemeToggleButton()
+        {
+            btnThemeToggle = new Button
+            {
+                Text = ThemeManager.IsDarkMode ? "☀️ وضع النهار" : "🌙 وضع الليل",
+                Location = new Point(280, 25),
+                Size = new Size(140, 30),
+                BackColor = ThemeManager.GetCardBackgroundColor(),
+                ForeColor = ThemeManager.GetTextColor(),
+                FlatStyle = FlatStyle.Flat,
+                Font = new Font("Segoe UI", 9F, FontStyle.Bold),
+                Cursor = Cursors.Hand
+            };
+            btnThemeToggle.FlatAppearance.BorderSize = 1;
+            btnThemeToggle.FlatAppearance.BorderColor = ThemeManager.GetBorderColor();
+            btnThemeToggle.Click += BtnThemeToggle_Click;
+
+            panelTop.Controls.Add(btnThemeToggle);
+        }
+
+        private void BtnThemeToggle_Click(object? sender, EventArgs e)
+        {
+            ThemeManager.ToggleTheme();
+            ThemeManager.SaveThemePreference();
+        }
+
+        private void OnThemeChanged(object? sender, EventArgs e)
+        {
+            // Update button text
+            if (btnThemeToggle != null)
+            {
+                btnThemeToggle.Text = ThemeManager.IsDarkMode ? "☀️ وضع النهار" : "🌙 وضع الليل";
+            }
+
+            // Apply theme to main dashboard
+            ApplyTheme();
+        }
+
+        private void ApplyTheme()
+        {
+            // Apply theme to top panel
+            panelTop.BackColor = ThemeManager.GetTopPanelColor();
+
+            // Apply theme to sidebar
+            panelSidebar.BackColor = ThemeManager.GetSidebarColor();
+            
+            // Update sidebar buttons
+            foreach (Control ctrl in panelSidebar.Controls)
+            {
+                if (ctrl is Button btn)
+                {
+                    if (btn == btnLogout)
+                    {
+                        btn.BackColor = ThemeManager.GetDangerColor();
+                    }
+                    else
+                    {
+                        btn.BackColor = ThemeManager.GetSidebarButtonColor();
+                    }
+                    btn.ForeColor = ThemeManager.GetTextOnPrimaryColor();
+                }
+            }
+
+            // Apply theme to content area
+            panelContent.BackColor = ThemeManager.GetContentBackgroundColor();
+
+            // Apply theme to stats panel
+            if (panelStats != null)
+            {
+                panelStats.BackColor = ThemeManager.GetCardBackgroundColor();
+                panelStats.BorderStyle = BorderStyle.FixedSingle;
+            }
+
+            // Apply theme to labels
+            foreach (Control ctrl in panelTop.Controls)
+            {
+                if (ctrl is Label lbl)
+                {
+                    lbl.ForeColor = ThemeManager.GetTextOnPrimaryColor();
+                }
+            }
+
+            // Apply theme to theme toggle button
+            if (btnThemeToggle != null)
+            {
+                btnThemeToggle.BackColor = ThemeManager.GetCardBackgroundColor();
+                btnThemeToggle.ForeColor = ThemeManager.GetTextColor();
+                btnThemeToggle.FlatAppearance.BorderColor = ThemeManager.GetBorderColor();
+            }
+
+            // Apply theme to product management section
+            if (pnlProductManagement != null)
+            {
+                ThemeManager.ApplyThemeToControl(pnlProductManagement);
+            }
+
+            // Refresh the form
+            this.Refresh();
+        }
+
         private void MainDashboard_FormClosing(object sender, FormClosingEventArgs e)
         {
+            // Unsubscribe from theme events
+            ThemeManager.ThemeChanged -= OnThemeChanged;
+            
             if (SessionManager.IsAuthenticated)
             {
                 var result = MessageBox.Show("هل تريد إغلاق التطبيق؟", "تأكيد الإغلاق",
